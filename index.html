@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Useless Information That Can Be Useful</title>
+</head>
+<body>
+    <center>
+        <h1>
+            USELSSS INFO
+        </h1>
+        <br>
+        <p>that could be.... useful stuff!</p>
+    </center>
+    <hr>
+    <p id="currentYearOnMercury">The Current Year on Mercury is theoretically: ????</p>
+    <small>
+        Probably every 5 years the year on Mercury will have a new year.
+    </small>
+    <br>
+    <br>
+    <p id="allToLife">If everyone came back to life, the world population by estimate would be: ????</p>
+    <small>
+        108 billion people would be old souls used again.
+    </small>
+    <br>
+    <br>
+    <p>The total of every country's national debt is $104 trillion</p>
+    <small>
+        Did you know that!?
+    </small>
+    <br>
+    <br>
+    <p id="disneyWorldPrices">Walt Disney World earns: ????? all from 160,000 people a day.</p>
+    <small>It just looks like they are such a greedy company...</small>
+    <br>
+    <br>
+    <p id="currentYearOnNeptune">The current year on Neptune is theoratically: ????</p>
+    <small>Every 100-200 years, Neptune will have a new year</small>
+    <br>
+    <br>
+    <p id="currentYearOnMars">The current year on Mars is theoretically: ????</p>
+    <small>Every 2 years, Mars will have a new year</small>
+    <br>
+    <br>
+    <p id="currentYearOnExoplanet">The current year on Kelper 22B is theoretically: ????</p>
+    <small>
+        Is it awesome to look at a exoplanet physically sometime?
+    </small>
+    <script>
+        function getMonthInText(number) {
+            if (number == 1) {
+                return "January"
+            }
+            if (number == 2) {
+                return "February"
+            }
+            if (number == 3) {
+                return "March"
+            }
+            if (number == 4) {
+                return "April"
+            }
+            if (number == 5) {
+                return "May"
+            }
+            if (number == 6) {
+                return "June"
+            }
+            if (number == 7) {
+                return "July"
+            }
+            if (number == 8) {
+                return "August"
+            }
+            if (number == 9) {
+                return "September"
+            }
+            if (number == 10) {
+                return "October"
+            }
+            if (number == 11) {
+                return "November"
+            }
+            if (number == 12) {
+                return "December"
+            }
+        }
+        setInterval(() => {
+            let yr = new Date().getFullYear();
+            let month = new Date().getMonth() + 1;
+            let ExoplanetMonth = getMonthInText(month-2);
+            document.getElementById("currentYearOnMercury").innerHTML = "The year on Mercury as a earth year is theoretically: " + Math.round(yr / (365.25/88));
+            document.getElementById("allToLife").innerHTML = "If everyone came back to life, then the world population by estimate would be: " + (108 + 8) + " billion"
+            document.getElementById("disneyWorldPrices").innerHTML = "Walt Disney World earns: $" + (160000*500) + " all from 160,000 people a day.";
+            document.getElementById("currentYearOnNeptune").innerHTML = "The year on Neptune as a earth year is theoretically: " + Math.round(yr / (60190/365.25));
+            document.getElementById("currentYearOnMars").innerHTML = "The year on Mars as a earth year is theoretically: " + Math.round(yr / (687/365.25));
+            document.getElementById("currentYearOnExoplanet").innerHTML = "The year on Kelper 22B (an exoplanet) as a earth year is theoretically: " + ExoplanetMonth + ", " + Math.round(yr / (365.25/290));
+        }, 10)
+    </script>
+</body>
+</html>
