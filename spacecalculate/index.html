@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Calculator | Itzgametime Vip Edu</title>
+        <link rel="stylesheet" href="index.css">
+        <link rel="shortcut icon" href="./planets/earth.png">
+        <style>
+            html,body{height:100%;margin:0}
+            body{
+                background-image:url('./bg.png');
+                background-size:cover;background-position:center;background-attachment:fixed;
+                display:flex;align-items:center;justify-content:center;padding:24px;font-family:system-ui,Segoe UI,Roboto,Arial;background-color:#000
+            }
+            .glass-card{width:100%;max-width:820px;background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));backdrop-filter:blur(8px) saturate(120%);-webkit-backdrop-filter:blur(8px) saturate(120%);border-radius:18px;padding:28px;border:1px solid rgba(255,255,255,0.12);box-shadow:0 8px 30px rgba(2,6,23,0.6);transition:transform .28s ease,box-shadow .28s ease,backdrop-filter .28s ease}
+            .glass-card:focus-within{transform:translateY(-6px);box-shadow:0 18px 50px rgba(2,6,23,0.6);backdrop-filter:blur(14px) saturate(140%)}
+            .glass-label{color:#fff;font-size:1.05rem;margin:0 0 10px 0}
+            .year-input{width:calc(100% - 8px);box-sizing:border-box;padding:16px 18px;font-size:1.25rem;border-radius:12px;border:0;outline:none;background:rgba(255,255,255,0.06);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,0.04);transition:box-shadow .18s ease,transform .18s ease;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+            .year-input::placeholder{color:rgba(255,255,255,0.85)}
+            .year-input:focus{box-shadow:0 8px 30px rgba(11,99,255,0.15);transform:translateY(-3px)}
+            .submit-row{display:flex;justify-content:flex-end;margin-top:12px}
+            /* custom planet selector */
+            .planet-ui{display:flex;align-items:center;gap:10px;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:10px;cursor:pointer;border:1px solid rgba(255,255,255,0.06)}
+            /* Default: rendered in viewport using fixed positioning (JS sets coords). */
+            .planet-options{position:fixed;left:0;top:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(8px);border-radius:10px;padding:8px;display:grid;grid-template-columns:1fr;gap:6px;z-index:9999;opacity:0;visibility:hidden;transform:translateY(-6px);transition:opacity .18s ease,transform .18s ease,visibility .18s;transform-origin:top left;box-sizing:border-box;max-width:720px}
+            .planet-options.open{opacity:1;visibility:visible;transform:translateY(0)}
+            .planet-option{display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px;border:0;background:transparent;color:#fff;text-align:left}
+            .planet-option img{width:34px;height:34px;border-radius:6px}
+            @media (max-width:520px){.planet-options{position:static;box-shadow:none;width:100%;max-width:none}}
+            .submit-btn{background:#0b63ff;color:#fff;border:0;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer;box-shadow:0 6px 20px rgba(11,99,255,0.14); backdrop-filter:blur(8px) saturate(120%);-webkit-backdrop-filter:blur(8px)}
+            .submit-btn:active{transform:translateY(1px)}
+            .msg{color:#fff;margin-top:10px;font-size:0.95rem}
+            @media (max-width:480px){.glass-card{padding:18px;border-radius:12px}.year-input{font-size:1.1rem;padding:12px;width:calc(100% - 8px)}}
+        </style>
+</head>
+<body>
+        <div class="page-center" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:20px">
+        <div class="glass-card" role="region" aria-label="Time travel input">
+                <form id="yearForm" action="./result/" method="get" novalidate>
+                    <label class="glass-label" for="year">Enter the year that you want to time travel:</label>
+                    <input id="year" name="year" class="year-input" type="text" inputmode="numeric" placeholder="e.g. 2050" aria-label="Year input">
+                    <div class="submit-row" style="flex-direction:column;align-items:stretch;gap:10px">
+                        <div style="display:flex;flex-direction:column;gap:6px">
+                            <!-- hidden native select for form submission -->
+                            <select id="planet" name="planet" style="display:none">
+                                <option value="mercury">Mercury</option>
+                                <option value="venus">Venus</option>
+                                <option value="earth" selected>Earth</option>
+                                <option value="mars">Mars</option>
+                                <option value="jupiter">Jupiter</option>
+                                <option value="saturn">Saturn</option>
+                                <option value="uranus">Uranus</option>
+                                <option value="neptune">Neptune</option>
+                                <option value="pluto">Pluto</option>
+                                <option value="exoplanet">Kepler-22b</option>
+                            </select>
+
+                            <div class="planet-select-wrap" style="position:relative;max-width:420px">
+                                <div id="planetUi" class="planet-ui" role="button" aria-haspopup="listbox" aria-expanded="false" tabindex="0">
+                                    <img id="planetThumb" src="./planets/earth.png" alt="Earth" style="width:34px;height:34px;object-fit:contain;border-radius:6px">
+                                    <span id="planetName" style="color:#fff">Earth</span>
+                                    <span style="margin-left:auto;color:rgba(255,255,255,0.7)">▾</span>
+                                </div>
+                                <div id="planetOptions" class="planet-options" role="listbox" aria-labelledby="planetUi" hidden>
+                                    <button type="button" class="planet-option" data-value="mercury"><img src="./planets/mercury.png" alt="Mercury">Mercury</button>
+                                    <button type="button" class="planet-option" data-value="venus"><img src="./planets/venus.png" alt="Venus">Venus</button>
+                                    <button type="button" class="planet-option" data-value="earth"><img src="./planets/earth.png" alt="Earth">Earth</button>
+                                    <button type="button" class="planet-option" data-value="mars"><img src="./planets/mars.png" alt="Mars">Mars</button>
+                                    <button type="button" class="planet-option" data-value="jupiter"><img src="./planets/jupiter.png" alt="Jupiter">Jupiter</button>
+                                    <button type="button" class="planet-option" data-value="saturn"><img src="./planets/saturn.png" alt="Saturn">Saturn</button>
+                                    <button type="button" class="planet-option" data-value="uranus"><img src="./planets/uranus.png" alt="Uranus">Uranus</button>
+                                    <button type="button" class="planet-option" data-value="neptune"><img src="./planets/neptune.png" alt="Neptune">Neptune</button>
+                                    <button type="button" class="planet-option" data-value="pluto"><img src="./planets/pluto.png" alt="Pluto">Pluto</button>
+                                    <button type="button" class="planet-option" data-value="exoplanet"><img src="./planets/kelper22b.png" alt="Kepler-22b">Kepler-22b</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display:flex;justify-content:flex-end">
+                          <button id="submitYear" class="submit-btn" type="submit">Submit</button>
+                        </div>
+                    </div>
+                    <div id="msg" class="msg" aria-live="polite"></div>
+                </form>
+        </div>
+        
+        <section style="width:100%;max-width:820px;margin-top:0">
+            <h2 style="color:#fff;margin:0 0 12px 0;font-size:1rem;text-align:left">Here is the year for each known planet:</h2>
+            <br>
+            <small style="color:#fff;margin:0 0 12px 0;font-size:1rem;text-align:left">(These known planets are the planets that we can get the year easily by mathematical calculations)</small>
+            <div class="planet-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px">
+                <div class="planet-card" style="background:rgba(255,255,255,0.04);backdrop-filter:blur(8px);border-radius:12px;padding:10px;display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,0.06)">
+                    <img src="./planets/mercury.png" alt="Mercury" style="width:44px;height:44px;object-fit:contain;border-radius:8px">
+                    <div style="color:#fff" id="currentYearOnMercury">Text</div>
+                </div>
+                <div class="planet-card" style="background:rgba(255,255,255,0.04);backdrop-filter:blur(8px);border-radius:12px;padding:10px;display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,0.06)">
+                    <img src="./planets/earth.png" alt="Earth" style="width:44px;height:44px;object-fit:contain;border-radius:8px">
+                    <div style="color:#fff" id="currentYearOnEarth">Text</div>
+                </div>
+                <div class="planet-card" style="background:rgba(255,255,255,0.04);backdrop-filter:blur(8px);border-radius:12px;padding:10px;display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,0.06)">
+                    <img src="./planets/mars.png" alt="Mars" style="width:44px;height:44px;object-fit:contain;border-radius:8px">
+                    <div style="color:#fff" id="currentYearOnMars">Text</div>
+                </div>
+                <div class="planet-card" style="background:rgba(255,255,255,0.04);backdrop-filter:blur(8px);border-radius:12px;padding:10px;display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,0.06)">
+                    <img src="./planets/jupiter.png" alt="Jupiter" style="width:44px;height:44px;object-fit:contain;border-radius:8px">
+                    <div style="color:#fff" id="currentYearOnJupiter">Text</div>
+                </div>
+                <div class="planet-card" style="background:rgba(255,255,255,0.04);backdrop-filter:blur(8px);border-radius:12px;padding:10px;display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,0.06)">
+                    <img src="./planets/neptune.png" alt="Neptune" style="width:44px;height:44px;object-fit:contain;border-radius:8px">
+                    <div style="color:#fff" id="currentYearOnNeptune">Text</div>
+                </div>
+                <div class="planet-card" style="background:rgba(255,255,255,0.04);backdrop-filter:blur(8px);border-radius:12px;padding:10px;display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,0.06)">
+                    <img src="./planets/kelper22b.png" alt="Kelper 22b" style="width:44px;height:44px;object-fit:contain;border-radius:8px">
+                    <div style="color:#fff" id="currentYearOnExoplanet">Text</div>
+                </div>
+                <div class="planet-card" style="background:rgba(255,255,255,0.04);backdrop-filter:blur(8px);border-radius:12px;padding:10px;display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,0.06)">
+                    <img src="./planets/saturn.png" alt="Saturn" style="width:44px;height:44px;object-fit:contain;border-radius:8px">
+                    <div style="color:#fff" id="currentYearOnSaturn">Text</div>
+                </div>
+                <div class="planet-card" style="background:rgba(255,255,255,0.04);backdrop-filter:blur(8px);border-radius:12px;padding:10px;display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,0.06)">
+                    <img src="./planets/pluto.png" alt="Pluto" style="width:44px;height:44px;object-fit:contain;border-radius:8px">
+                    <div style="color:#fff" id="currentYearOnPluto">Text</div>
+                </div>
+                <div class="planet-card" style="background:rgba(255,255,255,0.04);backdrop-filter:blur(8px);border-radius:12px;padding:10px;display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,0.06)">
+                    <img src="./planets/uranus.png" alt="Uranus" style="width:44px;height:44px;object-fit:contain;border-radius:8px">
+                    <div style="color:#fff" id="currentYearOnUranus">Text</div>
+                </div>
+                <div class="planet-card" style="background:rgba(255,255,255,0.04);backdrop-filter:blur(8px);border-radius:12px;padding:10px;display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,0.06)">
+                    <img src="./planets/venus.png" alt="Venus" style="width:44px;height:44px;object-fit:contain;border-radius:8px">
+                    <div style="color:#fff" id="currentYearOnVenus">Text</div>
+                </div>
+            </div>
+            <style>
+                @media (max-width:900px){.planet-grid{grid-template-columns:repeat(3,1fr)}}
+                @media (max-width:520px){.planet-grid{grid-template-columns:repeat(1,1fr)}}
+            </style>
+        </section>
+        </div>
+        <script>
+            (function(){
+                const input = document.getElementById('year');
+                const form = document.getElementById('yearForm');
+                const msg = document.getElementById('msg');
+                const show = (t) => { msg.textContent = t; };
+
+                // prevent overflow when user pastes long text
+                input.addEventListener('input', ()=>{
+                    if (input.value.length > 8) input.value = input.value.slice(0,8);
+                });
+
+                // validate on submit; allow native submission to ./result/?year=...
+                form.addEventListener('submit', (e)=>{
+                    const v = input.value.trim();
+                    if (!v) { show('Please enter a year.'); input.focus(); e.preventDefault(); return; }
+                    const n = Number(v);
+                    if (!Number.isFinite(n)) { show('Invalid year. Use digits only.'); input.focus(); e.preventDefault(); return; }
+                    // otherwise allow the form to submit
+                });
+
+                // custom planet selector wiring
+                const planetUi = document.getElementById('planetUi');
+                const planetOptions = document.getElementById('planetOptions');
+                const planetThumb = document.getElementById('planetThumb');
+                const planetName = document.getElementById('planetName');
+                const hiddenSelect = document.getElementById('planet');
+                if (planetUi && planetOptions && hiddenSelect){
+                    const reposition = () => {
+                        if (!planetOptions.classList.contains('open')) return;
+                        const r = planetUi.getBoundingClientRect();
+                        const vw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+                        // clamp left so the menu remains in viewport (8px padding)
+                        const left = Math.max(8, Math.min(r.left, vw - 8 - r.width));
+                        const width = Math.min(r.width, vw - 16);
+                        planetOptions.style.left = left + 'px';
+                        planetOptions.style.top = (r.bottom + 6) + 'px';
+                        planetOptions.style.width = width + 'px';
+                        planetOptions.style.transformOrigin = 'top left';
+                    };
+
+                    const ensureAppendedToBody = () => {
+                        if (planetOptions.parentNode !== document.body) document.body.appendChild(planetOptions);
+                    };
+
+                    const open = () => {
+                        const isMobile = window.innerWidth <= 520;
+                        if (isMobile){
+                            // mobile fallback: keep dropdown in-flow and full-width inside its container
+                            const container = planetUi.parentNode;
+                            if (planetOptions.parentNode !== container) container.appendChild(planetOptions);
+                            planetOptions.style.position = '';
+                            planetOptions.style.left = '';
+                            planetOptions.style.top = '';
+                            planetOptions.style.width = '';
+                            planetOptions.style.right = '';
+                            planetOptions.style.zIndex = '';
+                            planetOptions.removeAttribute('hidden');
+                            // open after layout
+                            requestAnimationFrame(()=> requestAnimationFrame(()=> {
+                                planetOptions.classList.add('open');
+                                planetUi.setAttribute('aria-expanded','true');
+                            }));
+                            return;
+                        }
+
+                        // desktop: always append to body (do not move back on close)
+                        ensureAppendedToBody();
+                        planetOptions.style.position = 'fixed';
+                        planetOptions.removeAttribute('hidden');
+                        planetOptions.style.right = 'auto';
+                        planetOptions.style.boxSizing = 'border-box';
+                        planetOptions.style.zIndex = '9999';
+                        // initial position then re-run on next frames to avoid race conditions
+                        reposition();
+                        requestAnimationFrame(()=>{ reposition(); requestAnimationFrame(reposition); setTimeout(reposition, 120); });
+                        // show
+                        planetOptions.classList.add('open');
+                        planetUi.setAttribute('aria-expanded','true');
+                        window.addEventListener('resize', reposition);
+                        window.addEventListener('scroll', reposition, {passive:true});
+                    };
+
+                    const close = () => {
+                        planetOptions.classList.remove('open');
+                        planetUi.setAttribute('aria-expanded','false');
+                        window.removeEventListener('resize', reposition);
+                        window.removeEventListener('scroll', reposition, {passive:true});
+                        const onEnd = (ev) => {
+                            if (ev.target !== planetOptions) return;
+                            planetOptions.setAttribute('hidden','');
+                            planetOptions.removeEventListener('transitionend', onEnd);
+                        };
+                        planetOptions.addEventListener('transitionend', onEnd);
+                        // fallback in case transitionend doesn't fire
+                        setTimeout(()=>{ if (!planetOptions.classList.contains('open')) planetOptions.setAttribute('hidden',''); planetOptions.removeEventListener('transitionend', onEnd); }, 400);
+                    };
+
+                    planetUi.addEventListener('click', ()=>{ if (planetOptions.classList.contains('open')) close(); else open(); });
+                    planetUi.addEventListener('keydown', (e)=>{
+                        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); planetUi.click(); }
+                        if (e.key === 'Escape') close();
+                    });
+                    planetOptions.querySelectorAll('.planet-option').forEach(btn => {
+                        btn.addEventListener('click', ()=>{
+                            const v = btn.dataset.value;
+                            const img = btn.querySelector('img');
+                            hiddenSelect.value = v;
+                            planetThumb.src = img ? img.src : '';
+                            planetName.textContent = btn.textContent.trim();
+                            close();
+                        });
+                    });
+                    document.addEventListener('click', (e)=>{ if (!planetUi.contains(e.target) && !planetOptions.contains(e.target)) close(); });
+                }
+            })();
+        </script>
+        <script>
+        function getMonthInText(number) {
+            if (number == 1) {
+                return "January"
+            }
+            if (number == 2) {
+                return "February"
+            }
+            if (number == 3) {
+                return "March"
+            }
+            if (number == 4) {
+                return "April"
+            }
+            if (number == 5) {
+                return "May"
+            }
+            if (number == 6) {
+                return "June"
+            }
+            if (number == 7) {
+                return "July"
+            }
+            if (number == 8) {
+                return "August"
+            }
+            if (number == 9) {
+                return "September"
+            }
+            if (number == 10) {
+                return "October"
+            }
+            if (number == 11) {
+                return "November"
+            }
+            if (number == 12) {
+                return "December"
+            }
+        }
+        setInterval(() => {
+            let yr = new Date().getFullYear();
+            let month = new Date().getMonth() + 1;
+            let ExoplanetMonth = getMonthInText(month-2);
+            document.getElementById("currentYearOnMercury").innerHTML = Math.round(yr / (365.25/88));
+            document.getElementById("currentYearOnNeptune").innerHTML = Math.round(yr / (60190/365.25));
+            document.getElementById("currentYearOnMars").innerHTML = Math.round(yr / (687/365.25));
+            document.getElementById("currentYearOnExoplanet").innerHTML = Math.round(yr / (365.25/290));
+            document.getElementById("currentYearOnEarth").innerHTML = yr;
+            document.getElementById("currentYearOnJupiter").innerHTML = Math.round(yr / (365.25/36.525));
+            document.getElementById("currentYearOnPluto").innerHTML = Math.round(yr / (90560 / 365.25));
+            document.getElementById("currentYearOnSaturn").innerHTML = Math.round(yr / (10759/365.25));
+            document.getElementById("currentYearOnUranus").innerHTML = Math.round(yr / (30687/365.25));
+            document.getElementById("currentYearOnVenus").innerHTML = Math.round(yr / (225/365.25));
+        }, 10)
+    </script>
+    <script>
+        // set tooltip titles for planet cards from each image alt text
+        (function(){
+            document.querySelectorAll('.planet-card').forEach(card=>{
+                const img = card.querySelector('img[alt]');
+                if(img && img.alt) card.title = img.alt;
+            });
+        })();
+    </script>
+</body>
+</html>
